@@ -1,0 +1,12 @@
+.navbar-custom {
+    color: cornsilk;
+    background: darkolivegreen;
+}
+
+.navbar-custom:first-child {
+    border-bottom: 2px solid cornsilk;
+}
+
+.main-container{
+    margin-top: 4rem !important;
+}

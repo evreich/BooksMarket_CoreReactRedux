@@ -1,0 +1,51 @@
+body {
+    font-family: Arial;
+}
+
+html {
+    height: 100%;
+}
+p {
+    font-size: 14px;
+}
+td{
+    padding: 5px;
+}
+
+.table-condensed tr:first-child {
+    border-bottom:2px solid black;
+}
+
+td p{
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+.body-content{
+    height:inherit;
+}
+
+footer>p {
+    margin-bottom: 0;
+}
+
+td p{
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+#btnSearch{
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+#btnSearch:hover {
+    background-color: grey;
+}
+
+.searchTextbox{
+    width: 55% !important;
+}
+
+a, a:hower {
+    text-decoration:none !important;
+ }

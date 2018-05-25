@@ -1,0 +1,40 @@
+.navbar-custom ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.navbar-custom li {
+    float: left;
+}
+
+.navbar-custom a {
+    color: cornsilk;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar-brand{
+    margin-right: 75px;
+    font-family: fantasy
+}
+
+.navbar-brand a:hover{
+    text-decoration: none;
+}
+
+.navbar-custom a:hover{
+    color:white;
+}
+
+.navbar-item {
+    margin-top: 9px;
+    margin-right: 15px;
+}
+
+.navbar-item a:hover {
+    text-decoration: none;
+}

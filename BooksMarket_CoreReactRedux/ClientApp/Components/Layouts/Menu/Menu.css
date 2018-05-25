@@ -1,0 +1,31 @@
+.menu-leftside {
+    padding: 15px;
+    border-radius: 0 0 20px 0 ;
+    background: darkolivegreen;
+}
+
+.menu-title {
+    text-align: center;
+    color:white;
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    padding: 0 5px;
+}
+
+.menu-item {
+    background: white;
+    color: darkolivegreen;
+    display: block;
+    padding: 10px;
+    border: 1px solid #33663c;
+    border-radius: 10px;
+    margin-bottom: 5px;
+}
+
+.menu-item:hover {
+    background: rgb(115, 145, 63);
+    color: white;
+    text-decoration: none;
+}
