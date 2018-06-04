@@ -14,7 +14,6 @@
   <ItemGroup>
     <Folder Include="ClientApp\reducers\" />
     <Folder Include="ClientApp\state\" />
-    <Folder Include="Helpers\" />
   </ItemGroup>
 
   <ItemGroup>

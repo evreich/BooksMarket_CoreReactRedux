@@ -15,7 +15,7 @@ namespace BooksMarket_CoreReactRedux.Controllers
     [Authorize(Roles = 
           StandartIdentityDataConstants.ADMIN_ROLE + "," 
         + StandartIdentityDataConstants.STOREKEEPER_ROLE + "," 
-        + StandartIdentityDataConstants.USER_ROLE)]
+        + StandartIdentityDataConstants.USER_ROLE)] 
     public class BooksController : Controller
     {
         private readonly IBooksRepository _booksRepository;
@@ -32,8 +32,8 @@ namespace BooksMarket_CoreReactRedux.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBooksByFilter(string filter, [FromServices] IGenresRepository genresRep) => 
-            Ok(await _booksRepository.GetBooksByFilter(filter, (await genresRep.GetAllGenres()).ToList()));
+        public async Task<IActionResult> GetBooksByFilter(string searchExpr, int page, [FromServices] IGenresRepository genresRep) => 
+            Ok(await _booksRepository.GetBooksByFilter(searchExpr, (await genresRep.GetAllGenres()).ToList()));
 
         [HttpGet]
         public async Task<IActionResult> GetBooksByFilterInSomeGenre(string filter, string genre) => 
@@ -42,5 +42,25 @@ namespace BooksMarket_CoreReactRedux.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBooksByGenre(string genreTitle) => 
             Ok(await _booksRepository.GetBooksByGenre(genreTitle));
+
+        [HttpPost]
+        [Authorize(Roles = StandartIdentityDataConstants.ADMIN_ROLE + ","+ StandartIdentityDataConstants.STOREKEEPER_ROLE)]
+        public async Task<IActionResult> AddBook([FromBody] RequestModels.Book book)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var convertToDbObjectBook = new Book
+            {
+                Title = book.Title,
+                Author = book.Author,
+                DateCreating = new DateTime(Int32.Parse(book.DateCreating.Split(new char[] { '.' })[2]), 1, 1),
+                GenreId = book.GenreId,
+                Count = book.Count
+            };
+            await _booksRepository.AddElem(convertToDbObjectBook);
+            return Ok();
+        }
     }
 }

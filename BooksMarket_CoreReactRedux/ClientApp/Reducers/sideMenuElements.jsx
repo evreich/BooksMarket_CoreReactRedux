@@ -11,9 +11,6 @@ const sideMenuElements = (state = [], action) => {
             return state.map(el => sideMenuElement(el, action));
         case constants.DELETE_SLIDEMENU_ITEM:
             return state.filter(el => el.name !== action.nameMenu);
-        case constants.RESPONSE_SERVER_ERROR:
-            console.log(`Произошла ошибка: ${action.error}`);
-            return state;
         default:
             return state;
     }

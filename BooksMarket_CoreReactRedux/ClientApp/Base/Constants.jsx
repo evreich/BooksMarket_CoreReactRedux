@@ -1,11 +1,11 @@
 ﻿const books_const = {
     GET_BOOKS: {
         ACTION: "GET_BOOKS",
-        API: "/books"
+        API: "/books/getBooksByFilter"
     },
     ADD_BOOK: {
         ACTION: "ADD_BOOK",
-        API: "/books/add"
+        API: "/books/addBook"
     },
     EDIT_BOOK: {
         ACTION: "EDIT_BOOK",
@@ -14,7 +14,8 @@
     DELETE_BOOK: {
         ACTION: "DELETE_BOOK",
         API: "/books/delete"
-    }
+    },
+    SET_BOOKS: "SET_BOOKS"
 };
 
 const genres_const = {
@@ -80,8 +81,11 @@ const constants = {
     RESPONSE_SERVER_ERROR: "RESPONSE_SERVER_ERROR",
     VALID_SERVER_ERROR: "VALID_SERVER_ERROR",
     CLEAR_VALID_SERVER_ERROR: "CLEAR_VALID_SERVER_ERROR",
+    SET_REQUEST_RESULT: "SET_REQUEST_RESULT",
+    CLEAR_REQUEST_RESULT: "CLEAR_REQUEST_RESULT",
     AUTHORIZED: "AUTHORIZED",
     NOT_AUTHORIZED: "NOT_AUTHORIZED",
+    LOGIN_COMPONENT_PATH: "/login",
     ...users_const,
     ...sidebar_const,
     ...books_const,

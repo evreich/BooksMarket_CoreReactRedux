@@ -2,8 +2,8 @@ import user from "./user";
 import sideMenuElements from "./sideMenuElements";
 import books from "./books";
 import genres from "./genres";
-import role from "./role";
 import validServerError from "./validServerError";
+import requestResult from "./requestResult";
 import isAuthorized from "./isAuthorized";
 
 const rootReducer = ({
@@ -11,9 +11,9 @@ const rootReducer = ({
     sideMenuElements,
     books,
     genres,
-    role,
     validServerError,
-    isAuthorized
+    isAuthorized,
+    requestResult
 });
 
 export default rootReducer;

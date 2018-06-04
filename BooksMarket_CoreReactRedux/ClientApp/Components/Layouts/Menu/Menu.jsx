@@ -24,9 +24,8 @@ class Menu extends React.Component{
                 {
                     (this.state.menuLoaded && this.props.menuElements) ?
                         <MenuList menuElements={this.props.menuElements} /> :
-                    <div className="d-flex justify-content-center">
-                        <br />
-                        <div className="loader" style={{ width: "60px", height: "60px"}}></div>
+                    <div className="d-flex justify-content-center align-content-center mt-4 ">              
+                        <div className="loader" style={{ width: "60px", height: "60px"}}/>
                     </div>
                 }
             </div>

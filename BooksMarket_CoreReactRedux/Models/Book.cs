@@ -33,7 +33,6 @@ namespace BooksMarket_CoreReactRedux.Models
         public Book()
         {
             BookOrders = new List<BookOrder>();
-        }
-            
+        }    
     }
 }

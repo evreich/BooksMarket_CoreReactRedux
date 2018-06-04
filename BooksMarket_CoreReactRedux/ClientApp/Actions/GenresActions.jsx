@@ -1,7 +1,7 @@
 import constants from "../Base/Constants";
-import fetch from "isomorphic-fetch";
+import { fetchGet } from "../Utils/CommonFetches";
 import { addMenuItem, editMenuItem, deleteMenuItem } from "./SideMenuActions";
-import Genre from "../Models/Genre";
+import AuthInfo from "../Utils/AuthInfo";
 
 const getGenres = genres => ({
     type: constants.GET_GENRES.ACTION,
@@ -28,14 +28,13 @@ const errorReceive = err => ({
     error: err
 });
 
-export const getGenresAction = () => dispatch =>
-    fetch(constants.BASE_API + constants.GET_GENRES.API)
+export const getGenresAction = (token) => (dispatch, getState) => {
+    return fetchGet(constants.BASE_API + constants.GET_GENRES.API, new AuthInfo(token, getState().user.expireTimeToken, dispatch))
         .then(response => response.json())
-        .then(data => {
-            const genres = data.map(el => new Genre(...el));
-            dispatch(getGenres(genres));
-        })
-        .catch(err => dispatch(errorReceive(err)));
+        .then(data => dispatch(getGenres(data)))
+        .catch(err => 
+            dispatch(errorReceive(err)));
+};
 
 export const addGenreAction = genre => dispatch =>
     fetch(constants.BASE_API + constants.ADD_GENRE.API, {

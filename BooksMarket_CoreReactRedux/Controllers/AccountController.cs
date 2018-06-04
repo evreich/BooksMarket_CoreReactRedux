@@ -7,8 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using BooksMarket_CoreReactRedux.DbRepositories;
 using BooksMarket_CoreReactRedux.EF.SeedDbHelpers;
+using BooksMarket_CoreReactRedux.Helpers;
 using BooksMarket_CoreReactRedux.Models;
 using BooksMarket_CoreReactRedux.RequestModels;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -38,77 +40,41 @@ namespace BooksMarket_CoreReactRedux.Controllers
             _routeRepository = routeRepository;
         }
 
-        private string GenerateJwtToken(IdentityUser user, string role)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Role, role )
-            };
-
-            var key = AuthOptions.GetSymmetricSecurityKey();
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(Convert.ToDouble(AuthOptions.LIFETIME));
-
-            var token = new JwtSecurityToken(
-                AuthOptions.ISSUER,
-                AuthOptions.AUDIENCE,
-                claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        private async Task<IEnumerable<RouteElement>> GetRoutesForRole(string role)
-        {
-            var routesForRole = (await _routeRepository.GetRouteElementsForRole(role))
-                .Select(route => { route.IsAccessable = true; return route; })
-                .ToList();
-            var routesNotForRole = (await _routeRepository.GetAllRouteElems())
-                .Except(routesForRole, new RouterElementComparer());
-            var allRoutes = routesNotForRole.Concat(routesForRole);
-            return allRoutes;
-        }
-
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Registration(Registration regInfo)
+        public async Task<IActionResult> Registration([FromBody]Registration regInfo)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            User user = new User
-            {
-                Email = regInfo.Email,
-                PhoneNumber = regInfo.Phone,
-                FullName = regInfo.FullName
-            };
+            User user = new User(regInfo.Email, regInfo.FullName);
 
             var result = await _userManager.CreateAsync(user, regInfo.Password);
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("Error", "Создание пользователя не удалось. Обратитесь в техподдержку.");
-                return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
+                return BadRequest(ModelState);
             }
             string role = StandartIdentityDataConstants.USER_ROLE;
             await _userManager.AddToRoleAsync(user, role);
+            var userFromDB = _userManager.Users.Single(u => u.UserName == regInfo.Email);
+            var userToken = AccountControllerHelper.GenerateJwtToken(userFromDB, role);
+
             //отбор роутов для данной роли
-            var allRoutes = await GetRoutesForRole(role);
+            var allRoutes = await AccountControllerHelper.GetRoutesForRole(role, _routeRepository);
             //получение пунктов меню для пользователя
             var menuElemsForRole = _menuRepository.GetMenuElementsForRole(role);
-            var userFromDB = _userManager.Users.Single(u => u.Email == regInfo.Email);
+
+            var expireTime = Math.Round(DateTime.Now.ToUniversalTime().AddHours(AuthOptions.LIFETIME).Subtract(DateTime.MinValue.AddYears(1969)).TotalMilliseconds);
+
             return Ok(
                 new
                 {
-                    name = userFromDB.Email,
-                    token = GenerateJwtToken(userFromDB, role),
+                    name = userFromDB.UserName,
+                    token = userToken.token,
+                    expireTimeToken = expireTime,
                     role = new
                     {
                         name = StandartIdentityDataConstants.USER_ROLE,
@@ -119,9 +85,8 @@ namespace BooksMarket_CoreReactRedux.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody]Login loginInfo)
+        public async Task<IActionResult> Login([FromBody]Login loginInfo, [FromServices]IAntiforgery antiforgery)
         {
             if (!ModelState.IsValid)
             {
@@ -140,23 +105,39 @@ namespace BooksMarket_CoreReactRedux.Controllers
                 ModelState.AddModelError("isNotLogged", "Неверный пароль");
                 return BadRequest(ModelState);
             }
-            
+
             var role = await _userManager.GetRolesAsync(await _userManager.FindByEmailAsync(loginInfo.Email));
             if (role.Count != 1)
             {
                 throw new Exception("Ошибка! Пользователь должен обладать одной ролью.");
             };
 
+            var userToken = AccountControllerHelper.GenerateJwtToken(user, role[0]);
+            /* var identity = new ClaimsIdentity(userToken.claims);
+            var principal = new ClaimsPrincipal(identity);
+            //привязывем пользователя к текущему контексту
+            HttpContext.User = principal;
+
+            //устанавливаем куки на валидацию от CSRF атаки
+            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+
+            HttpContext.Response.Cookies.Append("RequestVerificationToken", tokens.RequestToken,
+                new CookieOptions()
+                {
+                    HttpOnly = false
+                });     
+            */
             //отбор роутов для данной роли
-            var allRoutes = await GetRoutesForRole(role[0]);
+            var allRoutes = await AccountControllerHelper.GetRoutesForRole(role[0], _routeRepository);
             //получение пунктов меню для пользователя
             var menuElemsForRole = _menuRepository.GetMenuElementsForRole(role[0]);
-
+            var expireTime = Math.Round(DateTime.Now.ToUniversalTime().AddHours(AuthOptions.LIFETIME).Subtract(DateTime.MinValue.AddYears(1969)).TotalMilliseconds);
             return Ok(
                 new
                 {
                     name = user.Email,
-                    token = GenerateJwtToken(user, role[0]),
+                    token = userToken.token,
+                    expireTimeToken = expireTime,
                     role = new
                     {
                         name = role[0],
@@ -170,6 +151,7 @@ namespace BooksMarket_CoreReactRedux.Controllers
         [Authorize]
         public IActionResult LogOff()
         {
+            HttpContext.Response.Cookies.Delete("RequestVerificationToken");
             // чистим корзину
             //cart.Clear();
             return Ok();

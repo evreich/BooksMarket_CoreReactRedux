@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { ConnectedRouter } from "react-router-redux";
 import createHistory from "history/createBrowserHistory";
 import "../node_modules/bootstrap/dist/css/bootstrap.css";
+import "../node_modules/bootstrap/dist/js/bootstrap";
 import "./index.css";
 
 const history = createHistory();

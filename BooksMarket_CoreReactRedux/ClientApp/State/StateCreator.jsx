@@ -12,7 +12,8 @@ export const stateData = {
     sideMenuElements: [],
     user : user ? JSON.parse(user) : user,
     isAuthorized : user ? true : false,
-    validServerError : ""
+    validServerError : "",
+    requestResult: ""
 };
 
 const clientLogger = store => next => action => {

@@ -4,11 +4,12 @@ import role from "./role";
 const user = (state = {}, action) => {
     switch (action.type) {
         case constants.LOGOUT_USER.ACTION:
-            return {};
+            return null;
         case constants.LOGIN_USER.ACTION:
             return {
                 name: action.user.name,
                 token: action.user.token,
+                expireTimeToken: action.user.expireTimeToken,
                 role: role({}, {
                     type: action.type,
                     name: action.user.role.name,
@@ -16,9 +17,6 @@ const user = (state = {}, action) => {
                     routes: action.user.role.routes
                 })
             };
-        case constants.RESPONSE_SERVER_ERROR:
-            console.log(`Произошла ошибка: ${action.error}`);
-            return state;
         default:
             return state;
     }

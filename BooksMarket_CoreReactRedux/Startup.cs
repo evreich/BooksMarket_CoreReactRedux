@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,7 +27,7 @@ namespace BooksMarket_CoreReactRedux
         public static readonly string ISSUER = "MyAuthServer"; 
         public static readonly string AUDIENCE = "http://localhost:53050/"; 
         const string KEY = "mysupersecret_secretkey!123"; 
-        public static readonly int LIFETIME = 1; 
+        public static readonly int LIFETIME = 3; 
         public static SymmetricSecurityKey GetSymmetricSecurityKey()
         {
             return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(KEY));
@@ -85,7 +86,6 @@ namespace BooksMarket_CoreReactRedux
                 };
             });
 
-            services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
             services.ConfigureApplicationCookie(opts =>
             {
                 opts.ExpireTimeSpan = TimeSpan.FromMinutes(60);
@@ -122,6 +122,20 @@ namespace BooksMarket_CoreReactRedux
             app.UseStaticFiles();
             app.UseSession();
             app.UseAuthentication();
+            /*
+            app.Use(next => ctx =>
+            {
+                var tokens = antiforgery.GetAndStoreTokens(ctx);
+
+                ctx.Response.Cookies.Append("RequestVerificationToken", tokens.RequestToken,
+                    new CookieOptions()
+                    {
+                        HttpOnly = false
+                    });
+
+                return next(ctx);
+            });
+            */
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -131,16 +145,7 @@ namespace BooksMarket_CoreReactRedux
                     name: "spa-fallback", 
                     defaults: new { controller = "Home", action = "Index" }); 
             });
-            app.Use(next => context =>
-            {
-                var tokens = antiforgery.GetAndStoreTokens(context);
-                context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken,
-                    new CookieOptions()
-                    {
-                        HttpOnly = false
-                    });
-                return next(context);
-            });
+
         }
     }
 }

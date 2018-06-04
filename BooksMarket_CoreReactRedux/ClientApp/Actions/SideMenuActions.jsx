@@ -1,6 +1,5 @@
 import constants from "../Base/Constants";
 import fetch from "isomorphic-fetch";
-import MenuElement from "../Models/MenuElement";
 
 const getMenuItems = menuItems => ({
     type: constants.GET_SLIDEMENU.ACTION,
@@ -9,7 +8,7 @@ const getMenuItems = menuItems => ({
 
 export const addMenuItem = nameMenu => ({
     type: constants.ADD_SLIDEMENU_ITEM,
-    menuItem: new MenuElement(nameMenu, `/books/${nameMenu}/1`)
+    menuItem: { name, path: `/books/${nameMenu}/1`}
 });
 
 export const editMenuItem = nameMenu => ({
@@ -28,10 +27,11 @@ const errorReceive = err => ({
 });
 
 export const getMenuItemsAction = () => dispatch =>
-    fetch(constants.BASE_API + constants.GET_SLIDEMENU.API)
+    fetch(constants.BASE_API + constants.GET_SLIDEMENU.API,
+        dispatch)
         .then(response => response.json())
         .then(data => {
-            const menuElements = data.map(el => new MenuElement(el.title, `/books/${el.title}/1`));
+            const menuElements = [...data];//data.map(el => { name: el.title, path : `/books/${el.title}/1`});
             dispatch(getMenuItems(menuElements));
         })
         .catch(err => dispatch(errorReceive(err)));

@@ -1,8 +1,9 @@
 import constants from "../Base/Constants";
 import { push } from "react-router-redux";
-import { fetchPost, fetchPostWithAutorization } from "../Utils/CommonFetches";
-import { validServerError } from "./CommonActions";
-import getStartPageForRole from "../Utils/getStartPafeForRole";
+import { fetchPost, fetchGet } from "../Utils/CommonFetches";
+import { validServerError, clearValidServerError } from "./CommonActions";
+import getStartPageForRole from "../Utils/getStartPageForRole";
+import AuthInfo from "../Utils/AuthInfo";
 
 const logoutUser = user => ({
     type: constants.LOGOUT_USER.ACTION,
@@ -27,22 +28,41 @@ const errorReceive = err => ({
     error: err
 });
 
-export const logoutAction = (token) => dispatch =>
-    fetchPostWithAutorization({}, constants.BASE_API + constants.LOGOUT_USER.API, token)
-        .then(response => response.json())
-        .then(data => {
-            dispatch(logoutUser(data));
+export const logoutAfterExpireTimeOut = () => dispatch => 
+    new Promise((resolve, reject) => {
+        try{
             dispatch(notAuthorizeUser());
-        })
-        .then(() => {
+            dispatch(logoutUser());
             localStorage.removeItem(constants.USER_KEY_ON_LOCALSTORAGE);
-        })
-        .catch(err => {
-            dispatch(errorReceive(err));
-        });
+            dispatch({
+                type: constants.VALID_SERVER_ERROR,
+                errors: "Окончилось время сессии аутентифицированного пользователя!\nПожалуйста, повторите вход."
+            });
+            resolve();
+        }
+        catch(error){
+            reject(error);
+        }
+    }).catch(error =>
+        dispatch(errorReceive(error))
+    );
+
+export const logoutAction = (token) => (dispatch, getState) => {
+    if (getState().user)
+        return fetchGet(constants.BASE_API + constants.LOGOUT_USER.API, new AuthInfo(token, getState().user.expireTimeToken, dispatch))
+            .then(response => response.text())
+            .then(() => {
+                dispatch(notAuthorizeUser());
+                dispatch(logoutUser());
+                localStorage.removeItem(constants.USER_KEY_ON_LOCALSTORAGE);
+            })
+            .catch(err => {
+                dispatch(errorReceive(err));
+            });
+};
 
 export const loginAction = user => dispatch =>
-    fetchPost(user, constants.BASE_API + constants.LOGIN_USER.API)
+    fetchPost(constants.BASE_API + constants.LOGIN_USER.API, user)
         .then(async response => {
             if (response.ok) 
                 return response.json();
@@ -54,10 +74,8 @@ export const loginAction = user => dispatch =>
                         statusCode: response.status,
                         errors
                     }));
-                    throw errors;
                 }
-                else 
-                    throw errors;              
+                throw errors;              
             }
         })
         .then(userParams => {
@@ -67,6 +85,7 @@ export const loginAction = user => dispatch =>
         .then(user => {
             localStorage.setItem(constants.USER_KEY_ON_LOCALSTORAGE, JSON.stringify(user));
             dispatch(authorizeUser());
+            dispatch(clearValidServerError());
             dispatch(push(getStartPageForRole(user.role.name)));  
         })
         .catch(err => {
@@ -74,16 +93,31 @@ export const loginAction = user => dispatch =>
         });
 
 export const registrationAction = user => dispatch =>
-    fetchPost(user, constants.BASE_API + constants.REGISTRATION_USER.API)
-        .then(response => response.json())
+    fetchPost(constants.BASE_API + constants.REGISTRATION_USER.API, user)
+        .then(async response => {
+            if (response.ok) 
+                return response.json();
+            else {
+                const errors = await response.json();
+                if (response.status === 400)
+                {
+                    dispatch(validServerError({
+                        statusCode: response.status,
+                        errors
+                    }));
+                }
+                throw errors;              
+            }
+        })
         .then(userParams => {
             dispatch(loginUser(userParams));
-            //combine user object
             return userParams;
         })
         .then(user => {
-            localStorage.setItem(constants.USER_KEY_ON_LOCALSTORAGE, user);
-            dispatch(push(constants.USER_STARTPAGE));
+            localStorage.setItem(constants.USER_KEY_ON_LOCALSTORAGE, JSON.stringify(user));
+            dispatch(authorizeUser());
+            dispatch(clearValidServerError());
+            dispatch(push(getStartPageForRole(user.role.name)));  
         })
         .catch(err => {
             dispatch(errorReceive(err));

@@ -9,5 +9,6 @@ export { default as Orders } from "./Orders";
 export { default as ReturnedBooks } from "./ReturnedBooks";
 export { default as StoreBooks } from "./StoreBooks";
 export { default as Users } from "./Users";
+export { default as Registration } from "./Registration";
 
 export { default as AccessDenied } from "./Errors/AccessDenied";
