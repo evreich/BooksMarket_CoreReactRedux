@@ -21,7 +21,7 @@ namespace BooksMarket_CoreReactRedux.Models
 
         [Required]
         public int GenreId { get; set; }
-        [JsonIgnore]
+        
         public Genre Genre { get; set; }
 
         [Required]

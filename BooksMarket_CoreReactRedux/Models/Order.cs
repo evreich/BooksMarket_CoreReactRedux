@@ -13,7 +13,6 @@ namespace BooksMarket_CoreReactRedux.Models
         [Required]
         public string UserId { get; set; }
 
-        [JsonIgnore]
         public User User { get; set; }
 
         public bool? IsSuccess { get; set; }

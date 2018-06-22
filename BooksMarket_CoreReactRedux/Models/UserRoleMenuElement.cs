@@ -13,9 +13,9 @@ namespace BooksMarket_CoreReactRedux.Models
         public int MenuElementId { get; set; }
         [Key]
         public string UserRoleId { get; set; }
-        [JsonIgnore]
+       
         public MenuElement MenuElement { get; set; }
-        [JsonIgnore]
+        
         public UserRole UserRole { get; set; }
     }
 }

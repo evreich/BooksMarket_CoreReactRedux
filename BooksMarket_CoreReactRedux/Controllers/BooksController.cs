@@ -32,7 +32,7 @@ namespace BooksMarket_CoreReactRedux.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBooksByFilter(string searchExpr, int page, [FromServices] IGenresRepository genresRep) => 
+        public async Task<IActionResult> GetBooksByFilter([FromServices] IGenresRepository genresRep, int page, string searchExpr = "") => 
             Ok(await _booksRepository.GetBooksByFilter(searchExpr, (await genresRep.GetAllGenres()).ToList()));
 
         [HttpGet]

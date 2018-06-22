@@ -6,6 +6,7 @@ import { loginAction } from "../../Actions/UsersActions";
 import { clearValidServerError } from "../../Actions/CommonActions";
 import * as validators from "../../Utils/Validators";
 import "../css/CommonStyle.css";
+import Loading from "../Layouts/Loading";
 
 class LoginComponent extends React.PureComponent {
     constructor(props) {
@@ -96,14 +97,7 @@ class LoginComponent extends React.PureComponent {
             isRememberMe,
             disabledEnter
         } = this.state;
-        return isAuthorized ? (
-            <div className="d-flex justify-content-center align-content-center mt-4 ">
-                <div
-                    className="loader"
-                    style={{ width: "120px", height: "120px" }}
-                />
-            </div>
-        ) : (
+        return isAuthorized ? <Loading /> : (
             <div className="container">
                 <div className="row">
                     <div className="offset-2 col-7">

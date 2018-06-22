@@ -47,7 +47,8 @@
 }
 
 .main-container{
-    margin-top: 4rem !important;
+    margin-top: 5rem !important;
+    margin-bottom: 5rem !important;
 }
 
 .errors{
@@ -537,16 +538,41 @@
   border: 1px solid #ccc;
   margin-left: -5px;
   margin-right: -5px;
-}.datepicker{
+}#alert {
+    transition: opacity 5000ms 0ms;
+}
+
+.datepicker{
     margin-top:60px !important;
 }
 
+.booksTable {
+    border-spacing: 4px 2px;
+}
+
+.booksTable > thead > tr {
+    font-size: 18px;
+    padding: 5px 0;
+    border-bottom: 4px solid black;
+}
+
+.booksTable > tbody > tr:nth-child(2n+1) {
+    background: rgb(183, 236, 176);
+}
+.booksTable > tbody > tr:nth-child(2n) {
+    background: rgb(219, 255, 235);
+}
+.booksTable tr {
+    text-align: center;
+}
+
 /* The Modal (background) */
-.modal {
+.modal-window {
     display: block; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
     padding-top: 100px; /* Location of the box */
+    padding-left: 15px;
     left: 0;
     top: 0;
     width: 100%; /* Full width */
@@ -557,7 +583,7 @@
 }
 
 /* Modal Content */
-.modal-content {
+.modal-window-content {
     position: relative;
     background-color: #fefefe;
     margin: auto;
@@ -583,15 +609,15 @@
 }
 
 /* The Close Button */
-.close {
+.close-window {
     color: white;
     float: right;
     font-size: 28px;
     font-weight: bold;
 }
 
-.close:hover,
-.close:focus {
+.close-window:hover,
+.close-window:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
@@ -603,7 +629,9 @@
     color: white;
 }
 
-.modal-body {padding: 2px 16px;}
+.modal-body {
+    padding: 10px 25px !important;
+}
 
 .modal-footer {
     padding: 2px 16px;

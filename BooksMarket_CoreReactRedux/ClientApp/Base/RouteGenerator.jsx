@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import getStartPageForRole from "../Utils/getStartPageForRole";
 import * as components from "../Components";
 import constants from "./Constants";
+import Loading from "../Components/Layouts/Loading";
 
 class RouteGenerator extends React.PureComponent {
     constructor(props){
@@ -35,13 +36,7 @@ class RouteGenerator extends React.PureComponent {
 
     render() {
         const { routes, rolename } = this.props;
-        if (routes.length === 0)
-            return (
-                <div className="d-flex justify-content-center align-content-center mt-4 ">              
-                    <div className="loader" style={{ width: "120px", height: "120px"}}></div>
-                </div>
-            );
-        return (
+        return !routes.length ? <Loading /> : (
             <Switch>
                 <Redirect exact key="base" from="/" to={getStartPageForRole(rolename)} />
                 {routes.map(el => 
@@ -62,12 +57,11 @@ class RouteGenerator extends React.PureComponent {
     }
 }
 
-const mapStateToProps = state => {
-    const location = state.router.location.pathname;
-    const rolename = state.user ? state.user.role.name : "";
-    const routes = state.user ? state.user.role.routes : [];
-    return { routes, location, rolename };
-};
+const mapStateToProps = state => ({
+    location : state.router.location.pathname,
+    rolename : state.user && state.user.role ? state.user.role.name : "",
+    routes : state.user && state.user.role ? state.user.role.routes : []
+});
 
 const mapDispatchToProps = dispatch => ({
     onNotAuthorized() {

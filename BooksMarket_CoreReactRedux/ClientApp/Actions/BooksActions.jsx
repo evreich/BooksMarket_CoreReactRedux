@@ -13,20 +13,28 @@ const errorReceive = err => ({
     error: err
 });
 
-export const getBooksAction = (searchExpr = undefined, page = 1) => (dispatch, getState) => {
-    const data = {
-        searchExpr,
-        page
-    };
+export const getAllBooksAction = () => (dispatch, getState) => {
     const { expireTimeToken, token } = getState().user;
     const queryToAPI = `${constants.BASE_API}${constants.GET_BOOKS.API}`;
 
+    return fetchGet(queryToAPI,new AuthInfo(token, expireTimeToken, dispatch))
+        .then(response => response.json())
+        .then(data => dispatch(setBooks(data)))
+        .catch(err => dispatch(errorReceive(err)));
+};
+
+export const getBooksByFilterAction = (searchExpr = "", page = 1) => (dispatch, getState) => {
+    let data = { page };
+    
+    if(searchExpr)
+        data = {...data, searchExpr};
+    
+    const { expireTimeToken, token } = getState().user;
+    const queryToAPI = `${constants.BASE_API}${constants.GET_BOOKS_BY_FILTER.API}`;
+
     return fetchGet(queryToAPI,new AuthInfo(token, expireTimeToken, dispatch), data)
         .then(response => response.json())
-        .then(data => {
-            const books = data.map(el => el);
-            dispatch(setBooks(books));
-        })
+        .then(data => dispatch(setBooks(data)))
         .catch(err => dispatch(errorReceive(err)));
 };
 
@@ -36,9 +44,10 @@ export const addBookAction = (book, token) => (dispatch, getStore) =>
             if (response.ok) return true;
             else throw new Error(response.statusText);
         })
-        .then(() => dispatch(setRequestResult("Книга успешно добавлена!")))
-        //.then(() => getBooksAction(params))
-        //.then(() => redurect to books)
+        .then(() => {
+            dispatch(getAllBooksAction());
+            dispatch(setRequestResult("Книга успешно добавлена!"));
+        })
         .catch(err => {
             dispatch(errorReceive(err));
             dispatch(setRequestResult("Произошла ошибка при добавлении книги."));
@@ -50,7 +59,7 @@ export const editBookAction = (book, searchExpr, page) => dispatch =>
         body: JSON.stringify(book)
     })
         .then(response => response.json())
-        .then(() => getBooksAction(searchExpr, page))
+        .then(() => getAllBooksAction(searchExpr, page))
         .catch(err => dispatch(errorReceive(err)));
 
 export const deleteBookAction = (bookId, searchExpr, page) => dispatch =>
@@ -59,5 +68,5 @@ export const deleteBookAction = (bookId, searchExpr, page) => dispatch =>
         body: JSON.stringify(bookId)
     })
         .then(response => response.json())
-        .then(() => getBooksAction(searchExpr, page))
+        .then(() => getAllBooksAction(searchExpr, page))
         .catch(err => dispatch(errorReceive(err)));

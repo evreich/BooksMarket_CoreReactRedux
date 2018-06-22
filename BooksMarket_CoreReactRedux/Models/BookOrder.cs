@@ -12,13 +12,11 @@ namespace BooksMarket_CoreReactRedux.Models
         [Key]
         public int BookId { get; set; }
 
-        [JsonIgnore]
         public Book Book { get; set; }
 
         [Key]
         public int OrderId { get; set; }
 
-        [JsonIgnore]
         public Order Order { get; set; }
 
         public bool? IsReturned { get; set; }

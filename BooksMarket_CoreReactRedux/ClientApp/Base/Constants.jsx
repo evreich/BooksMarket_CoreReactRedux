@@ -1,7 +1,11 @@
 ﻿const books_const = {
+    GET_BOOKS_BY_FILTER: {
+        ACTION: "GET_BOOKS_BY_FILTER",
+        API: "/books/getBooksByFilter"
+    },
     GET_BOOKS: {
         ACTION: "GET_BOOKS",
-        API: "/books/getBooksByFilter"
+        API: "/books/getBooks"
     },
     ADD_BOOK: {
         ACTION: "ADD_BOOK",

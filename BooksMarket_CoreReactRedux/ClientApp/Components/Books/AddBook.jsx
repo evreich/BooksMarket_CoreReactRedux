@@ -53,12 +53,14 @@ class AddBook extends React.PureComponent {
     };
 
     componentWillUnmount = () => {
+        const { clearRequestResult, showAddBookSetState } = this.props;
         this.$dateInputRef.datepicker("destroy");
-        this.props.clearRequestResult();
+        clearRequestResult();
+        showAddBookSetState(false);
     };
 
     handleSubmit = event => {
-        const { onAddBook, token } = this.props;
+        const { onAddBook, token, showAddBookSetState } = this.props;
         const inputs = [
             this.titleInputRef,
             this.dateInputRef,
@@ -75,7 +77,7 @@ class AddBook extends React.PureComponent {
         ];
 
         event.preventDefault();
-        if (checkFieldsIsFilled(inputs, errors, this.setState.bind(this)))
+        if (checkFieldsIsFilled(inputs, errors, this.setState.bind(this))) {
             onAddBook(
                 {
                     Title: this.titleInputRef.current.value,
@@ -86,10 +88,12 @@ class AddBook extends React.PureComponent {
                 },
                 token
             );
+            showAddBookSetState(false);
+        }
     };
 
     render() {
-        const { genres } = this.props;
+        const { genres, showAddBookSetState } = this.props;
         const {
             titleError,
             authorError,
@@ -99,11 +103,11 @@ class AddBook extends React.PureComponent {
         } = this.state;
 
         return (
-            <div id="myModal" className="modal">
-                <div className="modal-content">
+            <div id="myModal" className="modal-window">
+                <div className="modal-window-content">
                     <div className="modal-header">
-                        <span className="close">&times;</span>
                         <h2>Добавление книги</h2>
+                        <span onClick={() => showAddBookSetState(false)} className="close-window">&times;</span>                      
                     </div>
                     <div className="modal-body">
                         <form method="post" onSubmit={this.handleSubmit}>
@@ -188,7 +192,6 @@ class AddBook extends React.PureComponent {
                         </form>
                     </div>
                     <div className="modal-footer">
-                        <h3>Modal Footer</h3>
                     </div>
                 </div>
             </div>

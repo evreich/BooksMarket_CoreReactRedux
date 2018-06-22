@@ -4,6 +4,7 @@ import "../Components/css/Loader.css";
 import { push } from "react-router-redux";
 import RouteGenerator from "./RouteGenerator";
 import constants  from "./Constants";
+import Loading from "../Components/Layouts/Loading";
 
 class LoginChecker extends React.PureComponent {
 
@@ -21,18 +22,7 @@ class LoginChecker extends React.PureComponent {
         this.redirectOnLogin();
     }
 
-    render() {
-        const { isAuthorized } = this.props;
-
-        if (isAuthorized) {
-            return <RouteGenerator />;
-        }       
-        else {
-            return <div className="d-flex justify-content-center align-content-center mt-4 ">              
-                <div className="loader" style={{ width: "120px", height: "120px"}}></div>
-            </div>;
-        }
-    }
+    render = () => this.props.isAuthorized ? <RouteGenerator /> : <Loading />;
 }
 
 const mapStateToProps = (state) => 

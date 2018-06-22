@@ -2,13 +2,14 @@
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { getBooksAction } from "../../Actions/BooksActions";
+import { getAllBooksAction } from "../../Actions/BooksActions";
 import { clearRequestResult } from "../../Actions/CommonActions";
 import AddBook from "./AddBook";
 import EditBook from "./EditBook";
 import DeleteBook from "./DeleteBook";
 import Book from "./Book";
 import "./Books.css";
+import Loading from "../Layouts/Loading";
 
 class Books extends React.PureComponent {
     constructor(props) {
@@ -28,29 +29,28 @@ class Books extends React.PureComponent {
         books: PropTypes.array
     };
 
-    showAddBookSetState = (state, bookId) => {
+    showAddBookSetState = (isNeedShow) => {
         this.setState({
-            showAddBookWindow: state,
+            showAddBookWindow: isNeedShow
+        });
+    };
+
+    showEditBookSetState = (isNeedShow, bookId) => {
+        this.setState({
+            showEditBookWindow: isNeedShow,
             choosedBookId: bookId
         });
     };
 
-    showEditBookSetState = (state, bookId) => {
+    showDeleteBookSetState = (isNeedShow, bookId) => {
         this.setState({
-            showEditBookWindow: state,
-            choosedBookId: bookId
-        });
-    };
-
-    showDeleteBookSetState = (state, bookId) => {
-        this.setState({
-            showDeleteBookWindow: state,
+            showDeleteBookWindow: isNeedShow,
             choosedBookId: bookId
         });
     };
 
     componentDidMount = () => {
-        this.props.getBooks("", 1, this.props.token);
+        this.props.getBooks();
     };
 
     componentWillUnmount = () => {
@@ -65,10 +65,11 @@ class Books extends React.PureComponent {
         const { books, actionResult } = this.props;
 
         const requestResultMessage = actionResult ? (
-            <div className="alert alert-info" role="alert">
+            <div id="alert" className="alert alert-info" role="alert">
                 {actionResult}
             </div>
         ) : null;
+
 
         const {
             showAddBookWindow,
@@ -78,17 +79,18 @@ class Books extends React.PureComponent {
         } = this.state;
 
         const showAddBookComponent = showAddBookWindow ? (
-            <AddBook book={books.find(book => book.id === choosedBookId)} />
+            <AddBook showAddBookSetState={this.showAddBookSetState} />
         ) : null;
         const showEditBookComponent = showEditBookWindow ? (
-            <EditBook book={books.find(book => book.id === choosedBookId)} />
+            <EditBook book={books.find(book => book.id === choosedBookId)} showEditBookSetState={this.showEditBookSetState} />
         ) : null;
         const showDeleteBookComponent = showDeleteBookWindow ? (
-            <DeleteBook book={books.find(book => book.id === choosedBookId)} />
+            <DeleteBook book={books.find(book => book.id === choosedBookId)} showDeleteBookSetState={this.showDeleteBookSetState}/>
         ) : null;
 
         return (
-            <div className="container mt-5">
+            !books.length ? <Loading /> :
+            <div className="container">
                 {/* Выпадающие окна на CRUD действия над книгами */}
                 {showAddBookComponent}
                 {showEditBookComponent}
@@ -96,24 +98,30 @@ class Books extends React.PureComponent {
                 <h1>Список книг</h1>
                 <br />
                 {requestResultMessage}
-                <table className="table-condensed">
-                    <tr>
-                        <th className="text-center">Название</th>
-                        <th className="text-center">Автор</th>
-                        <th className="text-center">Жанр</th>
-                        <th className="text-center">Дата создания</th>
-                        <th className="text-center">Количество</th>
-                        <th className="text-center">Действия</th>
-                    </tr>
-                    {books.map(book => (
-                        <Book
-                            key={`${book.id}_${book.title}`}
-                            book={book}
-                            openEditBook={this.showEditBookSetState}
-                            openDeleteBook={this.showDeleteBookSetState}
-                        />
-                    ))}
+                <table className="booksTable">
+                    <thead>
+                        <tr>
+                            <th className="text-center">Название</th>
+                            <th className="text-center">Автор</th>
+                            <th className="text-center">Жанр</th>
+                            <th className="text-center">Дата создания</th>
+                            <th className="text-center">Количество</th>
+                            <th className="text-center">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {books.map(book => (
+                            <Book
+                                key={`${book.id}_${book.title}`}
+                                book={book}
+                                openEditBook={this.showEditBookSetState}
+                                openDeleteBook={this.showDeleteBookSetState}
+                            />
+                        ))}
+                    </tbody>
                 </table>
+                <br />
+                <button className="btn btn-success" onClick={() => this.showAddBookSetState(true)}>Добавить книгу</button>
             </div>
         );
     }
@@ -125,8 +133,8 @@ const mapStateOnProps = state => ({
 });
 
 const mapDispatchOnProps = dispatch => ({
-    getBooks(searchExpr, page, token) {
-        dispatch(getBooksAction(searchExpr, page, token));
+    getBooks() {
+        dispatch(getAllBooksAction());
     },
     clearRequestResult() {
         dispatch(clearRequestResult());
